@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Authority Engine Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+     <div class="logo-block">
+       <div class="college">DPR Aviation College</div>
+       <div class="title">MINI-<span>FADEC</span> SIMULATOR</div>
+     </div>
+     <div class="header-meta">
+       Full Authority Digital Engine Control<br>
+       SYS TIME: <span id="clock">00:00</span> UTC
+        </div>
+    </header>
+ 
+<div class="grid">
+ 
+  
+  <div class="panel">
+    <div class="panel-label">01 / Inputs & Environment</div>
+ 
+    <div class="slider-group">
+      <div class="slider-header">
+        <span class="slider-name">Wₐ — Air Mass Flow</span>
+        <span class="slider-value" id="wa-val">150 kg/s</span>
+      </div>
+      <div class="slider-track">
+        <div class="slider-fill" id="wa-fill" style="width:23%"></div>
+        <input type="range" id="wa" min="10" max="600" step="5" value="150" oninput="update()">
+      </div>
+      <div class="slider-range"><span>10</span><span>600</span></div>
+    </div>
+ 
+    <div class="slider-group">
+      <div class="slider-header">
+        <span class="slider-name">Tamb — Ambient Temp</span>
+        <span class="slider-value" id="tamb-val">15 °C</span>
+      </div>
+      <div class="slider-track">
+        <div class="slider-fill" id="tamb-fill" style="width:55%"></div>
+        <input type="range" id="tamb" min="-40" max="60" step="1" value="15" oninput="update()">
+      </div>
+      <div class="slider-range"><span>-40</span><span>60</span></div>
+    </div>
+ 
+    <div class="slider-group">
+      <div class="slider-header">
+        <span class="slider-name">N₁ — Fan Speed</span>
+        <span class="slider-value" id="n1-val">5,000 RPM</span>
+      </div>
+      <div class="slider-track">
+        <div class="slider-fill" id="n1-fill" style="width:38%"></div>
+        <input type="range" id="n1" min="0" max="13000" step="100" value="5000" oninput="update()">
+      </div>
+      <div class="slider-range"><span>0</span><span>13,000</span></div>
+    </div>
+ 
+    <div class="sensor-box">
+      <div class="panel-label" style="margin-bottom:10px">Live Sensor Feed</div>
+      <div class="sensor-row">
+        <span class="sensor-key">Wₐ</span>
+        <span class="sensor-val" id="s-wa" style="color:var(--accent)">150 kg/s</span>
+      </div>
+      <div class="sensor-row">
+        <span class="sensor-key">Tamb</span>
+        <span class="sensor-val" id="s-tamb">15 °C</span>
+      </div>
+      <div class="sensor-row">
+        <span class="sensor-key">N₁</span>
+        <span class="sensor-val" id="s-n1" style="color:var(--green)">5,000 RPM</span>
+      </div>
+    </div>
+  </div>
+
+     <div class="panel">
+          <div class="panel-label">02 / FADEC Logic & Algorithm </div>
+
+          <div class="formula-box">
+            <div class="formula-label">Golden Rule</div>
+            <div class="formula-eq">W&#7522; = W&#7491; / 15</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:4px">stoichiometric ratio for jet fuel</div>
+          </div>
+
+          <div class="panel-label" style="margin-bottom:8px">Computation</div>
+
+          <div class="step-row" id="step-raw">
+            <span class="step-key">Raw Fuel Flow</span>
+            <span class="step-val" id="v-raw">10.00 kg/s</span>
+          </div>
+          <div class="step-row" id="step-egt">
+             <span class="step-key">EGT Estimate</span>
+             <span class="step-val" id="v-egt">—</span>
+          </div>
+          <div class="step-row" id="step-check">
+             <span class="step-key">Over-Temp?</span>
+             <span class="step-val" id="v-check">—</span>
+          </div>
+          <div class="step-row highlight" id="step-wf">
+             <span class="step-key">Final Wf</span>
+             <span class="step-val" id="v-wf" style="color:var(--accent)">—</span>
+          </div>
+           
+          <div class="logic-flow">
+            <div class="flow-node" id="fn-check">EGT CHECK</div>
+            <div class="flow-arrow">▶</div>
+            <div class="flow-node" id="fn-result">WITHIN LIMIT</div>
+            <div class="flow-arrow">▶</div>
+            <div class="flow-node" id="fn-action">Wf NOMINAL</div>
+          </div>
+     </div>
+          
+         <div class="panel">
+    <div class="panel-label">03 / Outputs & Engine Status</div>
+ 
+    <div class="gauges">
+      <div class="gauge-wrap">
+        <svg width="110" height="80" viewBox="0 0 110 80" id="gauge-egt-svg">
+          <path d="M 10 75 A 50 50 0 1 1 100 75" fill="none" stroke="#e8e4dc" stroke-width="10" stroke-linecap="round"/>
+          <path id="egt-arc" d="M 10 75 A 50 50 0 1 1 100 75" fill="none" stroke="#1a3a8a" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 219" style="transition:all 0.4s"/>
+          <line id="egt-needle" x1="55" y1="75" x2="55" y2="30" stroke="#1a3a8a" stroke-width="2" stroke-linecap="round" transform="rotate(-135,55,75)" style="transition:all 0.4s"/>
+          <circle cx="55" cy="75" r="4" id="egt-dot" fill="#1a3a8a"/>
+          <text id="egt-num" x="55" y="68" text-anchor="middle" fill="#1a1a18" font-size="13" font-family="'Share Tech Mono',monospace" font-weight="bold">0</text>
+        </svg>
+        <div class="gauge-label">EGT</div>
+        <div class="gauge-unit">°C</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg width="110" height="80" viewBox="0 0 110 80">
+          <path d="M 10 75 A 50 50 0 1 1 100 75" fill="none" stroke="#e8e4dc" stroke-width="10" stroke-linecap="round"/>
+          <path id="n1-arc" d="M 10 75 A 50 50 0 1 1 100 75" fill="none" stroke="#1a6a3a" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 219" style="transition:all 0.4s"/>
+          <line id="n1-needle" x1="55" y1="75" x2="55" y2="30" stroke="#1a6a3a" stroke-width="2" stroke-linecap="round" transform="rotate(-135,55,75)" style="transition:all 0.4s"/>
+          <circle cx="55" cy="75" r="4" id="n1-dot" fill="#1a6a3a"/>
+          <text id="n1-num" x="55" y="68" text-anchor="middle" fill="#1a1a18" font-size="11" font-family="'Share Tech Mono',monospace" font-weight="bold">0</text>
+        </svg>
+        <div class="gauge-label">N₁</div>
+        <div class="gauge-unit">RPM</div>
+      </div>
+    </div>
+ 
+    <div class="output-box">
+      <div class="output-label">Fuel Flow Output</div>
+      <div class="output-num" id="fuel-num" style="color:var(--accent)">—</div>
+      <div class="output-unit">L / min</div>
+    </div>
+ 
+    <div class="status-box ok" id="status-box">
+      <div class="status-label-sm">Engine Status</div>
+      <div class="status-text" id="status-text" style="color:var(--green)">AIRWORTHY</div>
+      <div class="fault-code" id="fault-code" style="display:none"></div>
+    </div>
+ 
+    <div class="fault-log">
+      <div class="fault-log-label">Event Log</div>
+      <div class="fault-log-box" id="log-box">— NO FAULTS RECORDED —</div>
+    </div>
+  </div>
+</div>
+ 
+<footer>
+  <span>GE9X / TRENT XWB ENGINE MODEL</span>
+  <span id="sys-status">● SYSTEM NOMINAL</span>
+  <span>DPR AVIATION COLLEGE © 2025</span>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
