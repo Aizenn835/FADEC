@@ -48,7 +48,7 @@ This project was developed as an educational tool for understanding the fundamen
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/mini-fadec-simulator.git
+git clone https://github.com/Aizenn835/FADEC.git
 ```
 
 ### Run Locally
