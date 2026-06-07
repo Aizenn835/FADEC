@@ -109,6 +109,10 @@ This project helps demonstrate:
 - Dark mode cockpit interface
 - Mobile responsiveness
 
+ ## 🤝 Acknowledgment
+
+This project was created for a friend who needed a simple and interactive way to demonstrate the basic principles of a Full Authority Digital Engine Control (FADEC) system. It was developed as both a learning experience and a practical simulation tool for educational purposes.
+
 ## 👨‍💻 Author
 
 **Lei Justine Clemente**
